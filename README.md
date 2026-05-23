@@ -1,1 +1,1 @@
-# MedManager-Gest-o-Hospitalar-de-Medicamentos-e-Procedimentos
+# MedManager: Gestão Hospitalar de Medicamentos e Procedimentos
