@@ -1,7 +1,14 @@
 from fastapi import FastAPI
+from app.controllers import users, patients, medications, procedures, medical_records
 
-app = FastAPI()
+app = FastAPI(title="MedManager API")
+
+app.include_router(users.router)
+app.include_router(patients.router)
+app.include_router(medications.router)
+app.include_router(procedures.router)
+app.include_router(medical_records.router)
 
 @app.get("/")
 def read_root():
-    return {"status": "OK"}
+    return {"message": "Welcome to MedManager API"}
