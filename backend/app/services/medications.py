@@ -1,22 +1,23 @@
 from sqlalchemy.orm import Session
 from app.models.catalog import Medication
 from app.schemas.medications import MedicationCreate, MedicationUpdate
-from fastapi import HTTPException
+from app.services.utils import get_object_or_404, validate_unique
 from typing import Optional
 
 class MedicationService:
     @staticmethod
     def validate_duplicate(db_session: Session, trade_name: str, active_ingredient: str, dosage: str, exclude_medication_id: Optional[int] = None):
-        query = db_session.query(Medication).filter(
-            Medication.trade_name == trade_name,
-            Medication.active_ingredient == active_ingredient,
-            Medication.dosage == dosage
+        validate_unique(
+            db_session, 
+            Medication, 
+            {
+                "trade_name": trade_name,
+                "active_ingredient": active_ingredient,
+                "dosage": dosage
+            }, 
+            exclude_id=exclude_medication_id, 
+            error_message="Medication with this trade name, active ingredient and dosage already exists"
         )
-        if exclude_medication_id:
-            query = query.filter(Medication.id != exclude_medication_id)
-        existing_medication = query.first()
-        if existing_medication:
-            raise HTTPException(status_code=400, detail="Medication with this trade name, active ingredient and dosage already exists")
 
     @staticmethod
     def get_all(db_session: Session):
@@ -24,10 +25,7 @@ class MedicationService:
 
     @staticmethod
     def get_by_id(db_session: Session, medication_id: int):
-        medication = db_session.query(Medication).filter(Medication.id == medication_id).first()
-        if not medication:
-            raise HTTPException(status_code=404, detail="Medication not found")
-        return medication
+        return get_object_or_404(db_session, Medication, medication_id)
 
     @staticmethod
     def create(db_session: Session, medication_data: MedicationCreate):

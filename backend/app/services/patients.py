@@ -1,18 +1,19 @@
 from sqlalchemy.orm import Session
 from app.models.patient import Patient
 from app.schemas.patients import PatientCreate, PatientUpdate
-from fastapi import HTTPException
+from app.services.utils import get_object_or_404, validate_unique
 from typing import Optional
 
 class PatientService:
     @staticmethod
     def validate_cpf_unique(db_session: Session, cpf: str, exclude_patient_id: Optional[int] = None):
-        query = db_session.query(Patient).filter(Patient.cpf == cpf)
-        if exclude_patient_id:
-            query = query.filter(Patient.id != exclude_patient_id)
-        existing_patient = query.first()
-        if existing_patient:
-            raise HTTPException(status_code=400, detail="CPF already registered")
+        validate_unique(
+            db_session, 
+            Patient, 
+            {"cpf": cpf}, 
+            exclude_id=exclude_patient_id, 
+            detail="CPF already registered"
+        )
 
     @staticmethod
     def get_all(db_session: Session):
@@ -20,10 +21,7 @@ class PatientService:
 
     @staticmethod
     def get_by_id(db_session: Session, patient_id: int):
-        patient = db_session.query(Patient).filter(Patient.id == patient_id).first()
-        if not patient:
-            raise HTTPException(status_code=404, detail="Patient not found")
-        return patient
+        return get_object_or_404(db_session, Patient, patient_id)
 
     @staticmethod
     def create(db_session: Session, patient_data: PatientCreate):

@@ -1,19 +1,20 @@
 from sqlalchemy.orm import Session
 from app.models.catalog import Procedure
 from app.schemas.procedures import ProcedureCreate, ProcedureUpdate
-from fastapi import HTTPException
+from app.services.utils import get_object_or_404, validate_unique
 from typing import Optional
 
 class ProcedureService:
     @staticmethod
     def validate_tuss_code_unique(db_session: Session, tuss_code: str, exclude_procedure_id: Optional[int] = None):
         if tuss_code:
-            query = db_session.query(Procedure).filter(Procedure.tuss_code == tuss_code)
-            if exclude_procedure_id:
-                query = query.filter(Procedure.id != exclude_procedure_id)
-            existing_procedure = query.first()
-            if existing_procedure:
-                raise HTTPException(status_code=400, detail="Procedure with this TUSS code already exists")
+            validate_unique(
+                db_session, 
+                Procedure, 
+                {"tuss_code": tuss_code}, 
+                exclude_id=exclude_procedure_id, 
+                error_message="Procedure with this TUSS code already exists"
+            )
 
     @staticmethod
     def get_all(db_session: Session):
@@ -21,10 +22,7 @@ class ProcedureService:
 
     @staticmethod
     def get_by_id(db_session: Session, procedure_id: int):
-        procedure = db_session.query(Procedure).filter(Procedure.id == procedure_id).first()
-        if not procedure:
-            raise HTTPException(status_code=404, detail="Procedure not found")
-        return procedure
+        return get_object_or_404(db_session, Procedure, procedure_id)
 
     @staticmethod
     def create(db_session: Session, procedure_data: ProcedureCreate):

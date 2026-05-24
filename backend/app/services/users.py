@@ -2,24 +2,23 @@ from sqlalchemy.orm import Session
 from app.models.user import User, Role
 from app.schemas.users import UserCreate, UserUpdate
 from app.core.security import hash_password
-from fastapi import HTTPException
+from app.services.utils import get_object_or_404, validate_unique
 from typing import Optional
 
 class UserService:
     @staticmethod
     def validate_email_unique(db_session: Session, email: str, exclude_user_id: Optional[int] = None):
-        query = db_session.query(User).filter(User.email == email)
-        if exclude_user_id:
-            query = query.filter(User.id != exclude_user_id)
-        existing_user = query.first()
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
+        validate_unique(
+            db_session, 
+            User, 
+            {"email": email}, 
+            exclude_id=exclude_user_id, 
+            error_message="Email already registered"
+        )
 
     @staticmethod
     def validate_role_exists(db_session: Session, role_id: int):
-        role = db_session.query(Role).filter(Role.id == role_id).first()
-        if not role:
-            raise HTTPException(status_code=400, detail="Role not found")
+        get_object_or_404(db_session, Role, role_id, error_message="Role not found")
 
     @staticmethod
     def get_all(db_session: Session):
@@ -27,10 +26,7 @@ class UserService:
 
     @staticmethod
     def get_by_id(db_session: Session, user_id: int):
-        user = db_session.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
+        return get_object_or_404(db_session, User, user_id)
 
     @staticmethod
     def create(db_session: Session, user_data: UserCreate):
