@@ -49,3 +49,9 @@ class ProcedureService:
         db_session.commit()
         db_session.refresh(procedure)
         return procedure
+
+    @staticmethod
+    def delete(db_session: Session, procedure_id: int):
+        procedure = ProcedureService.get_by_id(db_session, procedure_id)
+        db_session.delete(procedure)
+        db_session.commit()

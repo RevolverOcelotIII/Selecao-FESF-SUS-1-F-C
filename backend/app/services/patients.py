@@ -48,3 +48,9 @@ class PatientService:
         db_session.commit()
         db_session.refresh(patient)
         return patient
+
+    @staticmethod
+    def delete(db_session: Session, patient_id: int):
+        patient = PatientService.get_by_id(db_session, patient_id)
+        db_session.delete(patient)
+        db_session.commit()
