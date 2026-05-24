@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from app.controllers import users, patients, medications, procedures, medical_records, employees
+from app.controllers import users, patients, medications, procedures, medical_records, employees, auth
 
 app = FastAPI(title="MedManager API")
 
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(patients.router)
 app.include_router(medications.router)
