@@ -20,6 +20,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/code
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - PYTHONPATH=/code
