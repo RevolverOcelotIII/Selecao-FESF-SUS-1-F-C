@@ -37,7 +37,7 @@ export function AttendanceProceduresModule({ attendanceId }: AttendanceProcedure
     dispatcherOptions, 
     executorOptions, 
     medicationOptions 
-  } = useGetAttendanceProcedureFormData(isEditing ? undefined : activeFormProcedureId);
+  } = useGetAttendanceProcedureFormData(activeFormProcedureId);
 
   const fetchAttendanceProcedures = useCallback(async () => {
     setIsDataLoading(true);
@@ -161,7 +161,7 @@ export function AttendanceProceduresModule({ attendanceId }: AttendanceProcedure
         const isCreator = item.ordered_by_id === user?.employee_id;
         const isAdmin = accessLevel === AccessLevel.admin;
 
-        const canEditThisItem = isAdmin || (isMed ? isExecutor : isCreator);
+        const canEditThisItem = isAdmin || isCreator || isExecutor;
 
         return (
           <div className="action-buttons">
@@ -221,11 +221,19 @@ export function AttendanceProceduresModule({ attendanceId }: AttendanceProcedure
               }];
           }
           if (column.name === "executed_by_id") {
-              readOnly = true;
-              options = [{ 
-                  label: selectedAttendanceProcedure.executed_by?.full_name || "", 
-                  value: selectedAttendanceProcedure.executed_by_id || 0
-              }];
+              const isCreator = selectedAttendanceProcedure.ordered_by_id === user?.employee_id;
+              const isAdmin = accessLevel === AccessLevel.admin;
+              
+              if (isAdmin || isCreator) {
+                  options = executorOptions;
+                  readOnly = false;
+              } else {
+                  readOnly = true;
+                  options = [{ 
+                      label: selectedAttendanceProcedure.executed_by?.full_name || "", 
+                      value: selectedAttendanceProcedure.executed_by_id || 0
+                  }];
+              }
           }
       } else {
           if (column.name === "procedure_id") options = procedureOptions;
