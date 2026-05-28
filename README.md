@@ -1,4 +1,4 @@
-# MedManager ERP - Suíte de Operações Hospitalares
+# MedManager ERP - Plataforma de Operações Hospitalares
 
 **MedManager** é um protótipo e Proof of Concept (PoC) de um ERP hospitalar de alta performance e customizável. O projeto demonstra uma abordagem robusta para otimizar operações hospitalares, fluxos clínicos e gestão de recursos através de uma arquitetura **Model-Driven** totalmente dinâmica.
 
